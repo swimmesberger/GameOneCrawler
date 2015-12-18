@@ -1,0 +1,53 @@
+//
+// This file is to be applied to every subproject.
+//
+
+apply plugin: 'java'
+apply plugin: 'maven'
+
+String mavenGroupId = 'org.fseek.simon.gameone'
+String mavenVersion = '1.0-SNAPSHOT'
+
+sourceCompatibility = '1.8'
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+repositories {
+    mavenCentral();
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.slf4j:slf4j-simple:1.7.13'
+}
+
+String mavenArtifactId = name
+
+group = mavenGroupId
+version = mavenVersion
+
+task sourcesJar(type: Jar, dependsOn: classes, description: 'Creates a jar from the source files.') {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives jar
+    archives sourcesJar
+}
+
+configure(install.repositories.mavenInstaller) {
+    pom.project {
+        groupId = mavenGroupId
+        artifactId = mavenArtifactId
+        version = mavenVersion
+    }
+}
+
+task createFolders(description: 'Creates the source folders if they do not exist.') doLast {
+    sourceSets*.allSource*.srcDirs*.each { File srcDir ->
+        if (!srcDir.isDirectory()) {
+            println "Creating source folder: ${srcDir}"
+            srcDir.mkdirs()
+        }
+    }
+}

@@ -1,0 +1,12 @@
+.nb-gradle
+.gradle
+build
+cache
+/*/build
+/*/cache
+/*/.settings
+/*/bin
+
+*.classpath
+*.project
+/.settings

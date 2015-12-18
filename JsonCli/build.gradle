@@ -1,0 +1,22 @@
+jar {
+  manifest {
+    attributes("Implementation-Title": "GameOneJson", "Implementation-Version": version, 'Main-Class': 'org.fseek.simon.gameone.Main')
+  }
+}
+buildscript {
+    repositories { jcenter() }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.2'
+    }
+}
+
+dependencies {
+    compile project(':CrawlerLib')
+    compile 'com.beust:jcommander:1.48'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.6.4'
+    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.6.4'
+    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.6.4'
+    compile 'org.slf4j:slf4j-simple:1.7.13'
+}
+
+apply plugin: 'com.github.johnrengelman.shadow'
