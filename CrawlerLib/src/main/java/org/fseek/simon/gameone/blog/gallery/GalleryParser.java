@@ -21,13 +21,24 @@ import java.util.stream.Collectors;
 import org.fseek.simon.gameone.constants.HTMLConstants;
 import org.fseek.simon.gameone.parse.ParseException;
 import org.fseek.simon.gameone.util.ErrorUtil;
+import org.fseek.simon.gameone.util.ErrorUtil.FunctionException;
 import org.fseek.simon.gameone.util.JsoupUtil;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 public class GalleryParser {
     private static final String GALLERY_CLASS = "gallery";
     private static final String GALLERY_IMAGE_CLASS = "gallery_image";
     private static final String GALLERY_IMAGE_CAPTION_CLASS = "caption";
+
+    private static final String GALLERY_GRID_IMAGE_CLASS = "image_link";
+
+    // yeah there is a typo in this classname...
+    private static final String GALLERY_VOTEABLE_GALLERY_CLASS = "votable";
+    private static final String GALLERY_VOTEABLE_IMAGE_CONTENT_CLASS = "image_content";
+    private static final String GALLERY_VOTEABLE_IMAGE_CLASS = "image";
+    private static final String GALLERY_VOTEABLE_IMAGE_SELECTOR = "." + GALLERY_VOTEABLE_IMAGE_CONTENT_CLASS + " > ."
+            + GALLERY_VOTEABLE_IMAGE_CLASS + " > " + HTMLConstants.IMAGE_TAG;
 
     public List<Gallery> findGalleries(Element postPart) throws ParseException {
         List<Gallery> galleries = postPart.getElementsByClass(GALLERY_CLASS).stream()
@@ -36,8 +47,27 @@ public class GalleryParser {
     }
 
     public Gallery parse(Element gallery) throws ParseException {
-        List<GalleryImage> images = gallery.getElementsByClass(GALLERY_IMAGE_CLASS).stream()
-                .map(ErrorUtil.rethrow(this::parseGalleryImage)).collect(Collectors.toList());
+        FunctionException<Element, GalleryImage> galleryImageParser;
+        Elements elements;
+        if (gallery.hasClass(GALLERY_VOTEABLE_GALLERY_CLASS)) {
+            galleryImageParser = this::parseVoteableGalleryImage;
+            elements = gallery.select(GALLERY_VOTEABLE_IMAGE_SELECTOR);
+        } else {
+            galleryImageParser = this::parseGalleryImage;
+            elements = gallery.getElementsByClass(GALLERY_IMAGE_CLASS);
+            // we have to do some trial and error to detect grid based galleries
+            // :/
+            // currently no way to detect grid layout beforehand
+            if (elements.size() <= 0) {
+                elements = gallery.getElementsByClass(GALLERY_GRID_IMAGE_CLASS);
+                if (elements.size() <= 0) {
+                    throw ErrorUtil.parseError("Unkown gallery type!");
+                }
+                galleryImageParser = this::parseGridGalleryImage;
+            }
+        }
+        List<GalleryImage> images = elements.stream().map(ErrorUtil.rethrow(galleryImageParser))
+                .collect(Collectors.toList());
         int id = JsoupUtil.getId(gallery);
         return new Gallery(id, images);
     }
@@ -46,6 +76,19 @@ public class GalleryParser {
         String caption = JsoupUtil.getElementByClass(galleryImage, GALLERY_IMAGE_CAPTION_CLASS).text();
         URL imageURL = JsoupUtil.url(JsoupUtil.getElementByTag(galleryImage, HTMLConstants.A_TAG),
                 HTMLConstants.HREF_ATTRIBUTE);
+        return new GalleryImage(caption, imageURL);
+    }
+
+    public GalleryImage parseGridGalleryImage(Element gridGalleryImage) throws ParseException {
+        URL imageURL = JsoupUtil.url(gridGalleryImage, HTMLConstants.HREF_ATTRIBUTE);
+        String caption = JsoupUtil.attr(JsoupUtil.getElementByTag(gridGalleryImage, HTMLConstants.IMAGE_TAG),
+                HTMLConstants.ALT_ATTRIBUTE);
+        return new GalleryImage(caption, imageURL);
+    }
+
+    public GalleryImage parseVoteableGalleryImage(Element voteableGalleryImage) throws ParseException {
+        URL imageURL = JsoupUtil.url(voteableGalleryImage, HTMLConstants.SRC_ATTRIBUTE);
+        String caption = JsoupUtil.attr(voteableGalleryImage, HTMLConstants.ALT_ATTRIBUTE);
         return new GalleryImage(caption, imageURL);
     }
 

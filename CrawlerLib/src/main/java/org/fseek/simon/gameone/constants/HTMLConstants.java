@@ -18,6 +18,7 @@ public interface HTMLConstants {
     public static final String HREF_ATTRIBUTE = "href";
     public static final String ID_ATTRIBUTE = "id";
     public static final String SRC_ATTRIBUTE = "src";
+    public static final String ALT_ATTRIBUTE = "alt";
 
     public static final String IMAGE_TAG = "img";
     public static final String H2_TAG = "h2";
