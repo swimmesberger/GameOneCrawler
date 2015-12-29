@@ -84,7 +84,7 @@ public class TVEntryParser implements DocumentParser<TVEntry> {
         Optional<Element> descrElement = JsoupUtil.oGetElementByTag(showDesc, HTMLConstants.P_TAG);
         String description;
         if (descrElement.isPresent()) {
-            description = descrElement.get().text();
+            description = descrElement.get().html();
         } else {
             List<TextNode> textNodes = showDesc.textNodes();
             description = textNodes.get(textNodes.size() - 1).text();

@@ -14,7 +14,10 @@
  *******************************************************************************/
 package org.fseek.simon.gameone.tv;
 
+import static org.junit.Assert.assertEquals;
+
 import java.nio.file.Paths;
+
 import org.fseek.simon.gameone.TestCachedURLParser;
 import org.fseek.simon.gameone.parse.OnlineURLParser;
 import org.fseek.simon.gameone.parse.ParseException;
@@ -23,13 +26,12 @@ import org.fseek.simon.gameone.tv.overview.TVEntry;
 import org.fseek.simon.gameone.tv.overview.TVEntryParser;
 import org.fseek.simon.gameone.util.JsoupUtil;
 import org.junit.After;
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
 public class TVEntryParserTest {
     private static final String[] TEST_URLS = new String[] { "http://www.gameone.de/tv/307",
-            "http://www.gameone.de/tv/113", "http://www.gameone.de/tv/1" };
+            "http://www.gameone.de/tv/113", "http://www.gameone.de/tv/1", "http://www.gameone.de/tv/88" };
 
     private TVEntryParser parser;
     private URLParser cachedUrlParser;
